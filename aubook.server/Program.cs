@@ -8,22 +8,23 @@ builder.Services.AddOpenApi();
 // builder.Services.AddControllersWithViews();
 builder.Services.AddControllers();
 
+// builder.Services.AddCors(options =>
+// {
+//     options.AddDefaultPolicy(policy =>
+//     {
+//         policy
+//             .WithOrigins("http://localhost:4200") // Angular dev server
+//             .AllowAnyHeader()
+//             .AllowAnyMethod();
+//     });
+// });
+
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseHsts();
-
-    app.UseSpa(spa =>
-    {
-        spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
-    });
-}
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+// app.UseCors();
 
 app.UseAuthorization();
 
@@ -41,11 +42,29 @@ app.UseStaticFiles(new StaticFileOptions
     ServeUnknownFileTypes = true
 });
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "api/{controller=Home}/{action=Index}/{id?}")
-    .WithStaticAssets();
+app.MapControllers();              // <-- MUST be before UseSpa / MapFallback
 
-app.MapFallbackToFile("/browser/index.html");
+if (app.Environment.IsDevelopment())
+{
+    // Any request that got this far (i.e. NOT /api and not a static file)
+    // is forwarded to the Angular dev server on :4200
+    // app.UseSpa(spa =>
+    // {
+    //     spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+    // });
+
+    app.MapWhen(ctx => !ctx.Request.Path.StartsWithSegments("/api"), spaApp =>
+    {
+        spaApp.UseSpa(spa =>
+        {
+            spa.UseProxyToSpaDevelopmentServer("http://localhost:4200");
+        });
+    });
+}
+else
+{
+    // Production: serve the pre-built files and fall back to index.html
+    app.MapFallbackToFile("index.html");
+}
 
 app.Run();
