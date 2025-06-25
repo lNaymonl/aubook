@@ -34,13 +34,12 @@ app.UseAuthorization();
 // app.UseStaticFiles();
 // app.UseStaticFiles(Path.Join(builder.Environment.ContentRootPath, "wwwroot/browser"));
 // Console.WriteLine(Path.Join(builder.Environment.ContentRootPath, "wwwroot/browser"));
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(builder.Environment.WebRootPath, "browser")),
-    RequestPath = "",
-    ServeUnknownFileTypes = true
-});
+// app.UseStaticFiles(new StaticFileOptions
+// {
+//     FileProvider = new PhysicalFileProvider(
+//         Path.Combine(builder.Environment.WebRootPath, "browser")),
+//     RequestPath = ""
+// });
 
 app.MapControllers();              // <-- MUST be before UseSpa / MapFallback
 

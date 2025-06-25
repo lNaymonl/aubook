@@ -41,6 +41,15 @@ export class App {
         const audioPlayer = this.audioPlayer()?.nativeElement;
         if (!audioPlayer) return;
 
-        audioPlayer.src = "/api/audio/stream";
+        this.http.get("/api/audio/stream", {
+            "responseType": "blob"
+        }).subscribe((res) => {
+            const audioUrl = URL.createObjectURL(res);
+            audioPlayer.src = audioUrl;
+            audioPlayer.load()
+        })
+
+        // audioPlayer.src = "/api/audio/stream";
+        // audioPlayer.load()
     }
 }
